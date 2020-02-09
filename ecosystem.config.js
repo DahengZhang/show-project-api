@@ -1,4 +1,4 @@
-const { getArgv } = require('./config/util')
+const { getArgv } = require('./config/utils')
 
 let args = []
 getArgv('secret') && args.push(`--secret=${getArgv('secret')}`)
