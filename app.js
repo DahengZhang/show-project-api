@@ -1,4 +1,5 @@
 const Koa = require('koa')
+const cors = require('@koa/cors')
 const koabody = require('koa-body')
 const error = require('koa-json-error')
 const parameter = require('koa-parameter')
@@ -14,10 +15,7 @@ mongoose.connection.on('error', console.error)
 
 const isDev = process.env.NODE_ENV === 'development'
 
-app.use(async (ctx, next) => {
-    ctx.set('Access-Control-Allow-Origin', '*')
-    await next()
-})
+app.use(cors())
 app.use(koabody())
 app.use(error({
     postFormat: (_, { stack, ...rest }) => isDev ? { stack, ...rest } : rest
