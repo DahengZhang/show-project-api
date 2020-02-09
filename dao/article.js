@@ -1,4 +1,5 @@
 const articleSchema = require('../schema/article')
+const { getUser } = require('./user')
 
 const all = async () => {
     return await articleSchema.aggregate([{
@@ -27,8 +28,16 @@ const all = async () => {
 
 const detail = async (id) => {
     try {
-        const result = await articleSchema.findById(id)
-        return result || Promise.reject({
+        let result = await articleSchema.findById(id)
+        if (result) {
+            result = result.toObject()
+            let author = await getUser(result.author)
+            author = author.toObject()
+            delete author._id
+            result.author = author
+            return result
+        }
+        return Promise.reject({
             code: 400,
             msg: 'cannot find article'
         })
@@ -50,7 +59,8 @@ const create = async ({ title, author, content }) => {
 const _getAuthor = async (id) => {
     try {
         const result = await articleSchema.findById(id)
-        return result.author
+        const tmp = await getUser(result.author)
+        return result && tmp || {}
     } catch (error) {
         return Promise.reject({ code: 400 })
     }
@@ -71,13 +81,16 @@ const editor = async ({ id, author, query }) => {
     } catch (error) {
         return Promise.reject({ code: error.code, msg: 'cannot find article' })
     }
-    if (_author === author) {
+    if (_author.id === author) {
         delete query._id
         delete query.author
         delete query.createTime
         query.editorTime = new Date().getTime()
         try {
-            return await _editor(id, query)
+            let tmp = await _editor(id, query)
+            tmp = tmp.toObject()
+            tmp.author = _author
+            return tmp
         } catch (error) {
             return Promise.reject(error)
         }
