@@ -9,7 +9,7 @@ getArgv('collection') && args.push(`--collection=${getArgv('collection')}`)
 
 module.exports = {
     apps: [{
-        name: 'show-project-passport',
+        name: 'show-project-api',
         script: `npm run start -- ${args.join(' ')}`,
         instances: 1,
         autorestart: true,
